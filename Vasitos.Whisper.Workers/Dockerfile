@@ -1,14 +1,14 @@
-﻿FROM  mcr.microsoft.com/dotnet/runtime:9.0.2-bookworm-slim-amd64 AS base
+﻿FROM  mcr.microsoft.com/dotnet/runtime:9.0.2 AS base
 USER root
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libstdc++6 \
-    libc6=2.31-13+deb11u6 && \
+    libc6 && \
     rm -rf /var/lib/apt/lists/*
 USER $APP_UID
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0-bookworm-slim-amd64 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Vasitos.Whisper.Workers/Vasitos.Whisper.Workers.csproj", "Vasitos.Whisper.Workers/"]

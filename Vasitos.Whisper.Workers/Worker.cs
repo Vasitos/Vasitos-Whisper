@@ -69,7 +69,7 @@ public class Worker(
                         User = audioDto.User,
                         UserId = audioDto.UserId,
                         GuildId = audioDto.GuildId,
-                        Reason = "Skill issue"
+                        Reason = "Skill issue because gato and daves does not know how to code"
                     };
                     await publisher.PublishAsync(rejectedMessage, queueConfiguration.Value.RejectedAudioQueue);
                 }

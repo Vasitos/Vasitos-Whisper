@@ -6,7 +6,8 @@ on:
       - closed
     branches:
       - main
-
+env:
+  DOCKERFILE_LOCATION: Vasitos.Whisper.Workers
 jobs:
   generate-version:
     runs-on: ubuntu-22.04
@@ -17,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: '0'
+          fetch-depth: "0"
       - name: Bump version and push tag
         id: bump-version
         uses: anothrNick/github-tag-action@1.64.0
@@ -28,7 +29,7 @@ jobs:
           MINOR_STRING_TOKEN: "feat("
           PATCH_STRING_TOKEN: "fix("
           DEFAULT_BUMP: minor
-          
+
   build-and-publish:
     needs: generate-version
     runs-on: ubuntu-latest
@@ -40,9 +41,10 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build ExpressApi and publish to Docker Hub
+      - name: Build Vasitos Whisper server
         uses: docker/build-push-action@v2
         with:
           context: .
+          file: ./${{ env.DOCKERFILE_LOCATION }}/Dockerfile
           push: true
           tags: vasitos/whisper-server:latest, vasitos/whisper-server:${{ needs.generate-version.outputs.new_tag }}

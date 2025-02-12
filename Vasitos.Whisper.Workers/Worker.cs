@@ -23,14 +23,18 @@ public class Worker(
         logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
         var subscriber = redis.GetSubscriber();
         logger.LogInformation("Subscribing to {Queue}", _audioQueue);
-        await subscriber.SubscribeAsync(_audioQueue, async void (channel, message) =>
+
+        var channel = await subscriber.SubscribeAsync(_audioQueue);
+        channel.OnMessage(async channelMessage =>
         {
+            var message = channelMessage.Message;
             AudioDto? audioDto = null;
             try
             {
                 if (!message.HasValue)
                 {
-                    logger.LogWarning("Event from channel {Channel} does not contain any message value", channel);
+                    logger.LogWarning("Event from channel {Channel} does not contain any message value",
+                        channelMessage.Channel);
                     return;
                 }
 
@@ -39,13 +43,10 @@ public class Worker(
                 {
                     logger.LogInformation(
                         "Received message on channel {Channel}: {@AudioDto}",
-                        channel,
+                        channelMessage.Channel,
                         audioDto);
-                    // Process the audioDto object as needed
                     using var scope = serviceProvider.CreateScope();
                     var useCase = scope.ServiceProvider.GetRequiredService<IAudioProcessorUseCase>();
-
-                    // Execute the use case
                     await useCase.ExecuteAsync(audioDto);
                 }
                 else

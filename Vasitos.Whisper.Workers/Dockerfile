@@ -3,7 +3,8 @@ USER root
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libstdc++6 \
-    libc6 && \
+    libc6 \
+    libgomp1 && \
     rm -rf /var/lib/apt/lists/*
 USER $APP_UID
 WORKDIR /app

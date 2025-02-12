@@ -6,6 +6,7 @@ using Vasitos.Whisper.Infrastructure.AudioProcessor.Configuration;
 using Vasitos.Whisper.Infrastructure.FileValidator;
 using Whisper.net;
 using Whisper.net.Ggml;
+using Whisper.net.LibraryLoader;
 using Whisper.net.Logger;
 
 namespace Vasitos.Whisper.Infrastructure.AudioProcessor;
@@ -19,6 +20,7 @@ public class AudioProcessor(
 
     public async Task<string> ProcessAsync(Audio audio)
     {
+        RuntimeOptions.RuntimeLibraryOrder = [RuntimeLibrary.CpuNoAvx];
         logger.LogInformation("Transcoding audio");
         var parsedPath = fileValidator.ValidateFileExists(audio.PreProcessedAudioPath);
         if (!File.Exists(_options.ModelPath)) await DownloadModel(_options.ModelPath, _options.ModelType);

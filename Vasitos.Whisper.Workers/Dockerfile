@@ -3,6 +3,7 @@ USER root
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libstdc++6 \
+    glibc \
     libc6 && \
     rm -rf /var/lib/apt/lists/*
 USER $APP_UID

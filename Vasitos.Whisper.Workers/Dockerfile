@@ -1,8 +1,8 @@
-﻿FROM mcr.microsoft.com/dotnet/runtime:9.0 AS base
+﻿FROM  mcr.microsoft.com/dotnet/runtime:9.0.2-bookworm-slim-amd64 AS base
 USER $APP_UID
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0-bookworm-slim-amd64 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Vasitos.Whisper.Workers/Vasitos.Whisper.Workers.csproj", "Vasitos.Whisper.Workers/"]

@@ -1,4 +1,10 @@
 ﻿FROM  mcr.microsoft.com/dotnet/runtime:9.0.2-bookworm-slim-amd64 AS base
+USER root
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libstdc++6 \
+    libc6=2.31-13+deb11u6 && \
+    rm -rf /var/lib/apt/lists/*
 USER $APP_UID
 WORKDIR /app
 

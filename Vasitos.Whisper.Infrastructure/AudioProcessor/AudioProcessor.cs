@@ -36,6 +36,11 @@ public class AudioProcessor(
             builder = builder.WithThreads(_options.Threads.Value);
         }
 
+        if (!_options.UseContext)
+        {
+            builder = builder.WithNoContext();
+        }
+        
         await using var processor = builder.Build();
         await using var fileStream = File.OpenRead(parsedPath);
 
@@ -49,7 +54,7 @@ public class AudioProcessor(
         logger.LogInformation("Processing took {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
         var outputFileName = GenerateOutputFileName(audio.UserId.ToString());
         var date = DateTime.Now.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
-        var outputFilePath = Path.Combine(_options.OutputPath, date, audio.User, outputFileName);
+        var outputFilePath = Path.Combine(_options.OutputPath, audio.User, date, outputFileName);
         fileValidator.EnsureDirectoryPathExists(outputFilePath);
 
         await File.WriteAllTextAsync(outputFilePath, string.Join(Environment.NewLine, results));

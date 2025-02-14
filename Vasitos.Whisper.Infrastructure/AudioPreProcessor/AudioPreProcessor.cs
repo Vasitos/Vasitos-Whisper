@@ -51,14 +51,9 @@ public class AudioPreProcessor(
         var audioSpeech = VadHelper.GetSpeechSamples(array, resul);
 
         using var fileWriter = new WaveFileWriter(fileTrim, new WaveFormat(_configuration.SampleRate, 1));
-        var silenceSamples = _configuration.SampleRate * _configuration.SilencePadSeconds;
         foreach (var sample in audioSpeech)
         {
             fileWriter.WriteSample(sample);
-            for (var i = 0; i < silenceSamples; i++)
-            {
-                fileWriter.WriteSample(0.0f);
-            }
         }
         fileWriter.Flush();
         waveFileReader.Dispose();

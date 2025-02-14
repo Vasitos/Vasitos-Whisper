@@ -10,4 +10,5 @@ public class AudioPreProcessorConfiguration
     public float MaxSpeechDurationSeconds { get; set; } = float.PositiveInfinity;
     public int MinSilenceDurationMs { get; set; }
     public int SpeechPadMs { get; set; }
+    public int SilencePadSeconds { get; set; }
 }

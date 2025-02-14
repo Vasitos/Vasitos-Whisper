@@ -46,12 +46,20 @@ public class AudioPreProcessor(
 
         sampleProvider.Read(array, 0, array.Length);
 
-        var resul = _vad.GetSpeechTimestamps(array, min_silence_duration_ms: 500, threshold: 0.5f);
+        var resul = _vad.GetSpeechTimestamps(array, min_silence_duration_ms: _configuration.MinSilenceDurationMs, threshold: _configuration.Threshold);
 
         var audioSpeech = VadHelper.GetSpeechSamples(array, resul);
 
         using var fileWriter = new WaveFileWriter(fileTrim, new WaveFormat(_configuration.SampleRate, 1));
-        foreach (var sample in audioSpeech) fileWriter.WriteSample(sample);
+        var silenceSamples = _configuration.SampleRate * _configuration.SilencePadSeconds;
+        foreach (var sample in audioSpeech)
+        {
+            fileWriter.WriteSample(sample);
+            for (var i = 0; i < silenceSamples; i++)
+            {
+                fileWriter.WriteSample(0.0f);
+            }
+        }
         fileWriter.Flush();
         waveFileReader.Dispose();
         logger.LogInformation("Finished processing audio, saved on {Path}", fileTrim);

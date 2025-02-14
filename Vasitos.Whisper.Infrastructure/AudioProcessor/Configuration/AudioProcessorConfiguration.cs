@@ -9,4 +9,5 @@ public class AudioProcessorConfiguration
     public required string OutputPath { get; set; }
     public required int? Threads { get; set; }
     public GgmlType ModelType { get; set; } = GgmlType.Base;
+    public bool UseContext { get; set; }
 }

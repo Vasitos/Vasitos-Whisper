@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -28,19 +29,27 @@ public class AudioProcessor(
 
         using var whisperLogger = LogProvider.AddConsoleLogging(WhisperLogLevel.Debug);
         using var whisperFactory = WhisperFactory.FromPath(_options.ModelPath);
-        await using var processor = whisperFactory.CreateBuilder()
-            .WithLanguage(_options.Language)
-            .Build();
+        var builder = whisperFactory.CreateBuilder()
+            .WithLanguage(_options.Language);
+        if (_options.Threads.HasValue)
+        {
+            builder = builder.WithThreads(_options.Threads.Value);
+        }
+
+        await using var processor = builder.Build();
         await using var fileStream = File.OpenRead(parsedPath);
 
         logger.LogInformation("Start processing audio from {Audio}", parsedPath);
 
         var results = new List<string>();
+        var sw = Stopwatch.StartNew();
         await foreach (var result in processor.ProcessAsync(fileStream))
             results.Add($"[{result.Start}->{result.End}]: {result.Text}");
-
+        sw.Stop();
+        logger.LogInformation("Processing took {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
         var outputFileName = GenerateOutputFileName(audio.UserId.ToString());
-        var outputFilePath = Path.Combine(_options.OutputPath, audio.User, outputFileName);
+        var date = DateTime.Now.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+        var outputFilePath = Path.Combine(_options.OutputPath, date, audio.User, outputFileName);
         fileValidator.EnsureDirectoryPathExists(outputFilePath);
 
         await File.WriteAllTextAsync(outputFilePath, string.Join(Environment.NewLine, results));

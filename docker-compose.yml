@@ -1,0 +1,64 @@
+services:
+  whisperBot:
+    image: vasitos/whisper-bot:0.1.2
+    container_name: whisperBot
+    environment:
+      BOT_TOKEN: yourkey
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      AUDIO_QUEUE: VasitosAudio
+      REJECTED_AUDIO_QUEUE: FailedVasitosAudio
+      PROCESSED_AUDIO_QUEUE: ProcessedVasitosAudio
+      TRANSCRIPTION_INTERVAL: 10
+    volumes:
+      - type: bind
+        source: ./vasitos-doxer/audio/
+        target: /app/audio/
+    restart: unless-stopped
+
+  whisperServer:
+    image: vasitos/whisper-server:0.3.0
+    container_name: whisperServer
+    user: root
+    environment:
+      AudioPreProcessorConfiguration__AudioPath: /app/
+      AudioPreProcessorConfiguration__MinSilenceDurationMs: 2600
+      AudioPreProcessorConfiguration__SilencePadSeconds: 0
+      AudioProcessorConfiguration__ModelPath: /app/models/ggml-large-turbo-v3.bin
+      AudioProcessorConfiguration__OutputPath: /app/output/
+      AudioProcessorConfiguration__ModelType: 11
+      AudioProcessorConfiguration__Threads: 8
+      Cache__ConnectionString: redis:6379
+    volumes:
+      - type: bind
+        source: ./vasitos-doxer/models/
+        target: /app/models/
+      - type: bind
+        source: ./vasitos-doxer/audio/
+        target: /app/audio/
+      - type: bind
+        source: ./vasitos-doxer/output/
+        target: /app/output/
+    restart: unless-stopped
+
+  redis:
+    image: redislabs/redismod:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  redisinsight:
+    image: redislabs/redisinsight:latest
+    container_name: redisinsight
+    ports:
+      - "5540:5540"
+    volumes:
+      - redisinsight_data:/db
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  redisinsight_data:

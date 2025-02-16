@@ -12,6 +12,6 @@ public class AudioProcessorConfiguration
     public required float? Temperature { get; set; }
     public GgmlType ModelType { get; set; } = GgmlType.Base;
     // Order matters
-    public required RuntimeLibrary[] RuntimeLibraryOrder { get; set; } = [RuntimeLibrary.Cpu];
+    public required RuntimeLibrary[] RuntimeLibraryOrder { get; set; }
     public bool UseContext { get; set; }
 }

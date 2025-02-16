@@ -21,8 +21,10 @@ public class AudioProcessor(
 
     public async Task<string> ProcessAsync(Audio audio)
     {
-        RuntimeOptions.RuntimeLibraryOrder = [RuntimeLibrary.CpuNoAvx];
+        RuntimeOptions.RuntimeLibraryOrder = _options.RuntimeLibraryOrder.ToList();
         logger.LogInformation("Transcoding audio");
+        logger.LogInformation("Running with {Threads} threads", _options.Threads);
+        logger.LogInformation("Using runtime libraries: {@RuntimeLibraryOrder}", _options.RuntimeLibraryOrder);
         var parsedPath = fileValidator.ValidateFileExists(audio.PreProcessedAudioPath);
         if (!File.Exists(_options.ModelPath)) await DownloadModel(_options.ModelPath, _options.ModelType);
         fileValidator.EnsureDirectoryPathExists(_options.OutputPath);
@@ -39,6 +41,12 @@ public class AudioProcessor(
         if (!_options.UseContext)
         {
             builder = builder.WithNoContext();
+        }
+
+        var temperature = _options.Temperature;
+        if (temperature is not null)
+        {
+            builder.WithTemperature(temperature.Value);
         }
         
         await using var processor = builder.Build();
